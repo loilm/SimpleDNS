@@ -89,6 +89,7 @@ public class DnsController {
         Common.createFile(filePath);
         Common.writeToFile(filePath, contentChangeDns);
         Common.writeToFile(filePath, contentRestartNetwork);
+        Common.runCommand("chmod +x " + fileName);
         Common.runCommand(filePath);
         Common.deleteFile(filePath);
         showSuccessAlert();
