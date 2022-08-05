@@ -77,6 +77,7 @@ public class DnsController {
                 }
             }
         } else {
+            chooseDnsCombobox.setValue("Custom mode");
             preferredDns = preferredDnsServerTxt.getText();
             alternateDns = alternateDnsServerTxt.getText();
         }
