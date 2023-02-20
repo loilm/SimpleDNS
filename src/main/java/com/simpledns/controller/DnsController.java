@@ -13,7 +13,7 @@ public class DnsController {
     @FXML
     private RadioButton chooseDnsRadioBtn;
     @FXML
-    private ComboBox<String> chooseDnsCombobox;
+    private ComboBox<String> chooseDnsCbx;
     @FXML
     private RadioButton customDnsRadioBtn;
     @FXML
@@ -21,7 +21,7 @@ public class DnsController {
     @FXML
     private TextField alternateDnsServerTxt;
     @FXML
-    private TextField connectionNameTxt;
+    private ComboBox<String> connectNameCbx;
     private ObservableList<Dns> dnsList;
     private String connectionName;
     private String preferredDns = "", alternateDns = "";
@@ -40,26 +40,27 @@ public class DnsController {
     }
 
     public String getValueCombobox() {
-        return chooseDnsCombobox.getValue();
+        return chooseDnsCbx.getValue();
     }
 
     public void getListItemForCombobox() {
         dnsList = DnsDAO.getListDnsName();
         for (int i = 0; i < dnsList.size(); i++) {
-            chooseDnsCombobox.getItems().add(dnsList.get(i).getDnsName());
+            chooseDnsCbx.getItems().add(dnsList.get(i).getDnsName());
         }
-        chooseDnsCombobox.setVisibleRowCount(3);
-        chooseDnsCombobox.getSelectionModel().selectFirst();
+        chooseDnsCbx.setVisibleRowCount(3);
+        chooseDnsCbx.getSelectionModel().selectFirst();
     }
 
     public void clickChooseDnsServer() {
-        chooseDnsCombobox.setDisable(false);
+        chooseDnsCbx.setDisable(false);
         preferredDnsServerTxt.setDisable(true);
         alternateDnsServerTxt.setDisable(true);
+        getListItemForCombobox();
     }
 
     public void clickCustomDnsServer() {
-        chooseDnsCombobox.setDisable(true);
+        chooseDnsCbx.setDisable(true);
         preferredDnsServerTxt.clear();
         preferredDnsServerTxt.setDisable(false);
         alternateDnsServerTxt.clear();
@@ -67,7 +68,7 @@ public class DnsController {
     }
 
     public void clickApplyDnsBtn() {
-        connectionName = connectionNameTxt.getText();
+        connectionName = connectNameCbx.getValue();
         if (chooseDnsRadioBtn.isSelected()) {
             dnsList = DnsDAO.getListDnsName();
             for (Dns item : dnsList) {
@@ -77,7 +78,7 @@ public class DnsController {
                 }
             }
         } else {
-            chooseDnsCombobox.setValue("Custom mode");
+            chooseDnsCbx.setValue("Custom mode");
             preferredDns = preferredDnsServerTxt.getText();
             alternateDns = alternateDnsServerTxt.getText();
         }
@@ -99,12 +100,18 @@ public class DnsController {
         Alert alert = new Alert(Alert.AlertType.INFORMATION);
         alert.setTitle("Success");
         alert.setHeaderText(null);
-        alert.setContentText("Network: " + connectionName + "\nDNS Name: " + chooseDnsCombobox.getValue() + "\nIP4.DNS[1]: " + preferredDns + "\nIP4.DNS[2]: " + alternateDns);
+        alert.setContentText("Network: " + connectionName + "\nDNS Name: " + chooseDnsCbx.getValue() + "\nIP4.DNS[1]: " + preferredDns + "\nIP4.DNS[2]: " + alternateDns);
         alert.show();
     }
 
     public void clickRefreshBtn() {
-        String connectionName = Common.runCommandAndGetResult("iwgetid -r");
-        connectionNameTxt.setText(connectionName);
+        connectNameCbx.getItems().clear();
+        String connectionName = Common.runCommandAndGetResult("nmcli -t --fields NAME con show --active");
+        String[] arr = connectionName.split(System.lineSeparator());
+        for (String str: arr) {
+            connectNameCbx.getItems().add(str);
+        }
+        connectNameCbx.setVisibleRowCount(3);
+        connectNameCbx.getSelectionModel().selectFirst();
     }
 }
